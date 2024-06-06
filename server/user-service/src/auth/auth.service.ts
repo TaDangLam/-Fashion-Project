@@ -1,4 +1,75 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+
+import { User } from '@prisma/client';
+import { PrismaService } from 'src/prisma.service';
+import { LoginDto, RegisterDto } from './dto/auth.dto';
 
 @Injectable()
-export class AuthService {}
+export class AuthService {
+    constructor(
+        private readonly prismaService: PrismaService,
+        private readonly jwtService: JwtService
+    ) {}
+
+    register = async(data: RegisterDto): Promise<User> => {
+        const user = await this.prismaService.user.findUnique({where: { email: data.email }})
+        if(user) {
+            throw new HttpException({ message: 'This email has been used'}, HttpStatus.BAD_REQUEST);
+        }
+        const hashPassword = bcrypt.hashSync(data.password, 10);
+        const respose = await this.prismaService.user.create({
+            data: {
+                email: data.email,
+                fullname: data.fullname,
+                password: hashPassword,
+                confirmps: hashPassword,
+                phone: data.phone,
+                sex: data.sex,
+                dateOfBirth: new Date(data.dateOfBirth).toISOString(), // Chuyển đổi sang chuỗi ISO-8601
+            }
+        })
+        return respose;
+    }
+    
+    login = async(body: LoginDto): Promise<any> => {
+        const user = await this.prismaService.user.findUnique({ where: { email: body.email }})
+        if(!user) {
+            throw new HttpException({ message: 'This user is not exist!'}, HttpStatus.UNAUTHORIZED);
+        }
+        const verify = bcrypt.compareSync(body.password, user.password);
+        if(!verify) {
+            throw new HttpException({ message: 'Password is not correct!'}, HttpStatus.UNAUTHORIZED);
+        }
+
+        user.lastLogin = new Date();
+        await this.prismaService.user.update({
+            where: { id: user.id },
+            data: { lastLogin: user.lastLogin }
+        });
+
+        const payload = {id: user.id, email: user.email, fullname: user.fullname, role: user.role}
+        const accessToken = await this.jwtService.signAsync(payload, {
+            secret: process.env.ACCESS_TOKEN_KEY,
+            expiresIn: '1h'
+        });
+        const refreshToken = await this.jwtService.signAsync(payload, {
+            secret: process.env.REFRESH_TOKEN_KEY,
+            expiresIn: '30d'
+        });
+
+        const userWithoutPassword = {
+            ...user,
+            password: undefined,
+            confirmps: undefined,
+        };
+
+        return {
+            data: userWithoutPassword,
+            accessToken,
+            refreshToken
+        }
+    }
+
+}
