@@ -3,9 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 import { User } from '@prisma/client';
-import { PrismaService } from 'src/prisma.service';
-import { LoginDto, RegisterDto } from './dto/auth.dto';
-// import { AuthResponse } from './interfaces/auth.interface';
+import { LoginDto, RegisterDto, UpdateDto } from './dto/auth.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
@@ -97,10 +96,72 @@ export class AuthService {
     async getDetailUser(id: string): Promise<User> {
         try {
             const data = await this.prismaService.user.findUnique({
-                where: {
-                    id
-                }
+                where: { id }
             });
+            if (!data) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            }
+            return data;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    async updateUser(id: string, body: UpdateDto): Promise<User> {
+        try {
+            const user = await this.prismaService.user.findUnique({
+                where: { id }
+            });
+            if (!user) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            }
+
+            const data: any = {};
+            if(body.fullname && body.fullname !== user.fullname) {
+                data.fullname = body.fullname;
+            }
+            if(body.password && body.password !== user.password) {
+                data.password = bcrypt.hashSync(body.password, 10);
+            }
+            if(body.confirmps && body.confirmps !== user.confirmps) {
+                data.confirmps = bcrypt.hashSync(body.confirmps, 10);
+            }
+            if(body.phone && body.phone !== user.phone){
+                data.phone = body.phone;
+            }
+            if (body.dateOfBirth && body.dateOfBirth !== user.dateOfBirth) {
+                data.dateOfBirth = new Date(body.dateOfBirth).toISOString();
+            }
+            if (body.avatar && body.avatar !== user.avatar) {
+                data.avatar = body.avatar;
+            }
+            if (body.sex !== undefined && body.sex !== user.sex) {
+                data.sex = body.sex;
+            }
+            const updateUser = await this.prismaService.user.update({
+                where: { id },
+                data
+            })
+            return updateUser;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    async deleteUser(id: string): Promise<User> {
+        try {
+            const user = await this.prismaService.user.findUnique({
+                where: { id }
+            });
+            if (!user) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            }
+            const data = await this.prismaService.user.update({
+                where: { id },
+                data: {
+                    statusAccount: 'Deleted'
+                }
+            })
             return data;
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
