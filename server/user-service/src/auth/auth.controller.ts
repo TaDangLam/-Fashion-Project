@@ -7,7 +7,7 @@ import { AuthResponse } from './interfaces/auth.interface';
 import { AuthGuard } from 'src/auth/guards/auth.guards';
 import { Roles } from './decorator/roles.decorator';
 
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
@@ -48,7 +48,7 @@ export class AuthController {
         }
     }
    
-    @Get()
+    @Get('get-all-user')
     @UseGuards(AuthGuard)
     @Roles('admin')
     async getAllUser(@Res() res: Response): Promise<AuthResponse> {
@@ -66,7 +66,9 @@ export class AuthController {
         }
     }
 
-    @Get(':id')
+    @Get('get-detail/:id')
+    @UseGuards(AuthGuard)
+    @Roles('admin', 'staff', 'customer')
     async getDetailUser(@Param('id') id: string, @Res() res: Response): Promise<AuthResponse> {
         try {
             const data = await this.authService.getDetailUser(id);
@@ -82,7 +84,9 @@ export class AuthController {
         }
     }
 
-    @Patch(':id')
+    @Patch('update-user/:id')
+    @UseGuards(AuthGuard)
+    @Roles('admin', 'staff', 'customer')
     async UpdateUser(@Param('id') id: string, @Body() body: UpdateDto, @Res() res: Response): Promise<AuthResponse> {
         try {
             const data = await this.authService.updateUser(id, body);
@@ -98,7 +102,9 @@ export class AuthController {
         }
     }
 
-    @Delete(':id')
+    @Delete('delete-user/:id')
+    @UseGuards(AuthGuard)
+    @Roles('admin', 'staff')
     async DeleteUser(@Param('id') id: string, @Res() res: Response): Promise<AuthResponse> {
         try {
             await this.authService.deleteUser(id);

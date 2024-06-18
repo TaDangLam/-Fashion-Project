@@ -34,8 +34,13 @@ export class AuthGuard implements CanActivate {
     if(!user) {
       throw new BadRequestException('User not belong to token, try again!');
     }
-    if (roles && !roles.includes(user.role)) {
+    if(roles && !roles.includes(user.role)) {
       throw new ForbiddenException('You do not have permission to perform this action.');
+    }
+    if(user.role === 'customer'){
+      if(request.params.id !== user.id){
+        throw new ForbiddenException('You can only access your own data.');
+      }
     }
     request.user = user;
     return true;
