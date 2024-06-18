@@ -1,9 +1,11 @@
-import { Body, Controller, Post, HttpException, HttpStatus, Res, Get, Param, Patch, Delete } from '@nestjs/common';
+import { Body, Controller, Post, HttpException, HttpStatus, Res, Get, Param, Patch, Delete, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, UpdateDto } from './dto/auth.dto';
+import { LoginDto, RegisterDto, UpdateDto } from './dtos/auth.dto';
 import { AuthResponse } from './interfaces/auth.interface';
+import { AuthGuard } from 'src/auth/guards/auth.guards';
+import { Roles } from './decorator/roles.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -47,6 +49,8 @@ export class AuthController {
     }
    
     @Get()
+    @UseGuards(AuthGuard)
+    @Roles('admin')
     async getAllUser(@Res() res: Response): Promise<AuthResponse> {
         try {
             const data = await this.authService.getAllUser();

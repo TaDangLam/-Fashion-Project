@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 import { User } from '@prisma/client';
-import { LoginDto, RegisterDto, UpdateDto } from './dto/auth.dto';
+import { LoginDto, RegisterDto, UpdateDto } from './dtos/auth.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -57,11 +57,11 @@ export class AuthService {
             const payload = { id: user.id, email: user.email, fullname: user.fullname, role: user.role };
             const accessToken = await this.jwtService.signAsync(payload, {
                 secret: process.env.ACCESS_TOKEN_KEY,
-                expiresIn: '1h'
+                expiresIn: process.env.EXPIRESIN_ACCESS_TOKEN
             });
             const refreshToken = await this.jwtService.signAsync(payload, {
                 secret: process.env.REFRESH_TOKEN_KEY,
-                expiresIn: '30d'
+                expiresIn: process.env.EXPIRESIN_REFRESH_TOKEN
             });
 
             const userWithoutPassword = {
