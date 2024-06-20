@@ -20,6 +20,7 @@ model Images {
 
 model Product {
   id             Int       @id @default(autoincrement())
+  productCode    String    @unique
   name           String
   size           String?
   price          Decimal
