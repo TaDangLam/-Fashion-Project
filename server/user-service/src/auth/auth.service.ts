@@ -3,8 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 import { User } from '@prisma/client';
-import { LoginDto, RegisterDto, UpdateDto } from './dtos/auth.dto';
-import { PrismaService } from '../prisma/prisma.service';
+import { LoginDto, RegisterDto, UpdateDto } from 'src/auth/dtos/auth.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
@@ -83,9 +83,8 @@ export class AuthService {
     async getAllUser(): Promise<User[]> {
         try {
             const data = await this.prismaService.user.findMany({
-                where: {
-                    role: 'customer'
-                }
+                where: { role: 'customer' },
+                include: { address: true },
             });
             return data;
         } catch (error) {

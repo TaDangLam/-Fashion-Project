@@ -37,11 +37,15 @@ export class AuthGuard implements CanActivate {
     if(roles && !roles.includes(user.role)) {
       throw new ForbiddenException('You do not have permission to perform this action.');
     }
-    if(user.role === 'customer'){
-      if(request.params.id !== user.id){
-        throw new ForbiddenException('You can only access your own data.');
-      }
-    }
+    // if(user.role === 'customer'){
+    //   if(request.params.id !== user.id){
+    //     throw new ForbiddenException('You can only access your own data.');
+    //   }
+    // }
+
+    // if (user.role === 'customer' && request.params.id && request.params.id !== user.id) {
+    //   throw new ForbiddenException('You can only access your own data.');
+    // }
     request.user = user;
     return true;
   }
