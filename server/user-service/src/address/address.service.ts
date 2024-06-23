@@ -1,8 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 
 import { Address } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { newAddressDto } from 'src/address/dtos/address.dto';
+import { newAddressDto, updateAddressDto } from 'src/address/dtos/address.dto';
 
 @Injectable()
 export class AddressService {
@@ -28,7 +28,7 @@ export class AddressService {
         }
     }
 
-    async getDetailAddress(id: number): Promise<Address> {
+    async getDetailAddress(id: string): Promise<Address> {
         try {
             const data = await this.prismaService.address.findUnique({
                 where: { id }
@@ -56,17 +56,29 @@ export class AddressService {
         }
     }
 
-    async updateAddress() {
+    async updateAddress(id: string, body: updateAddressDto): Promise<Address> {
         try {
-            
+            const oldAddress = await this.prismaService.address.findUnique({ where: { id }});
+            if(!oldAddress) {
+                throw new NotFoundException('Address is not exist');
+            }
+            const data = await this.prismaService.address.update({
+                where: { id },
+                data: body
+            })
+            return data;
         } catch (error) {
             throw new InternalServerErrorException(error);
         }
     }
 
-    async deleteAddress() {
+    async deleteAddress(id: string): Promise<any> {
         try {
-            
+            const address = await this.prismaService.address.findUnique({ where: { id }});
+            if(!address) {
+                throw new NotFoundException('Address is not exist');
+            }
+            await this.prismaService.address.delete({ where: { id }});
         } catch (error) {
             throw new InternalServerErrorException(error);
         }

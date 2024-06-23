@@ -3,7 +3,7 @@ import { Request } from 'express';
 
 import { AddressService } from 'src/address/address.service';
 import { AddressResponse } from 'src/common/interfaces/address-module/address.interface';
-import { newAddressDto } from 'src/address/dtos/address.dto';
+import { newAddressDto, updateAddressDto } from 'src/address/dtos/address.dto';
 import { AuthGuard } from 'src/common/guards/auth.guards';
 import { Roles } from 'src/common/decorator/roles.decorator';
 
@@ -33,7 +33,7 @@ export class AddressController {
     @Roles('admin', 'staff', 'customer')
     async getDetailAddress(@Param('id') id: string): Promise<AddressResponse> {
         try {
-            const data = await this.addressService.getDetailAddress(parseInt(id));
+            const data = await this.addressService.getDetailAddress(id);
             return {
                 status: 'OK',
                 message: 'Get Detail Address is Successfully!!!',
@@ -62,29 +62,29 @@ export class AddressController {
     }
 
     @Patch('update-address/:id')
-    async updateAddress(@Param('id') id: number): Promise<AddressResponse> {
+    @UseGuards(AuthGuard)
+    @Roles('admin', 'staff', 'customer')
+    async updateAddress(@Param('id') id: string, @Body() body: updateAddressDto): Promise<AddressResponse> {
         try {
-            const data = await this.addressService.updateAddress();
-            // return {
-            //     status: 'OK',
-            //     message: 'Updated Address is Successfully!!!',
-            //     data
-            // };
-            return;
+            const data = await this.addressService.updateAddress(id, body);
+            return {
+                status: 'OK',
+                message: 'Updated Address is Successfully!!!',
+                data
+            };
         } catch (error) {
             throw new InternalServerErrorException(error);
         }
     }
 
     @Delete('delete-address/:id')
-    async deleteAddress(@Param('id') id: number): Promise<AddressResponse> {
+    async deleteAddress(@Param('id') id: string): Promise<AddressResponse> {
         try {
-            const data = await this.addressService.deleteAddress();
-            // return {
-            //     status: 'OK',
-            //     message: 'Deleted Address is Successfully!!!'
-            // }
-            return;
+            await this.addressService.deleteAddress(id);
+            return {
+                status: 'OK',
+                message: 'Deleted Address is Successfully!!!'
+            }
         } catch (error) {
             throw new InternalServerErrorException(error);
         }

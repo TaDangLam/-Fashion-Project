@@ -1,4 +1,4 @@
-import { IsNotEmpty } from "class-validator"
+import { IsNotEmpty, IsOptional } from "class-validator"
 
 export class newAddressDto {
     @IsNotEmpty()
@@ -8,5 +8,16 @@ export class newAddressDto {
     city: string
 
     @IsNotEmpty()
+    province: string
+}
+
+export class updateAddressDto {
+    @IsOptional()
+    street: string
+
+    @IsOptional()
+    city: string
+
+    @IsOptional()
     province: string
 }

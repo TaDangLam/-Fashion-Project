@@ -155,11 +155,14 @@ export class AuthService {
             if (!user) {
                 throw new HttpException('User not found', HttpStatus.NOT_FOUND);
             }
-            const data = await this.prismaService.user.update({
+            // const data = await this.prismaService.user.update({
+            //     where: { id },
+            //     data: {
+            //         statusAccount: 'Deleted'
+            //     }
+            // })
+            const data = await this.prismaService.user.delete({
                 where: { id },
-                data: {
-                    statusAccount: 'Deleted'
-                }
             })
             return data;
         } catch (error) {

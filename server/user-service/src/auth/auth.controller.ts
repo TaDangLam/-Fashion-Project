@@ -91,7 +91,7 @@ export class AuthController {
 
     @Delete('delete-user/:id')
     @UseGuards(AuthGuard)
-    @Roles('admin', 'staff')
+    @Roles('admin')
     async deleteUser(@Param('id') id: string): Promise<AuthResponse> {
         try {
             await this.authService.deleteUser(id);
