@@ -8,18 +8,18 @@ datasource db {
 }
 
 model Images {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   url       String
   type      String
   size      String
-  productId Int
+  productId String
   product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Product {
-  id             Int       @id @default(autoincrement())
+  id             String    @id @default(cuid())
   productCode    String    @unique
   name           String
   size           String?
@@ -28,7 +28,7 @@ model Product {
   promotionStart DateTime?
   promotionEnd   DateTime?
   images         Images[]
-  categoryId     Int
+  categoryId     String
   category       Category  @relation(fields: [categoryId], references: [id])
   desc           String    @db.LongText
   quantity       Int
@@ -39,9 +39,9 @@ model Product {
 }
 
 model Category {
-  id        Int        @id @default(autoincrement())
+  id        String     @id @default(cuid())
   name      String
-  parentId  Int?
+  parentId  String?
   parent    Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
   child     Category[] @relation("CategoryToCategory")
   product   Product[]

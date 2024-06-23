@@ -1,39 +1,84 @@
-import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, InternalServerErrorException, Param, Patch, Post } from '@nestjs/common';
 
-import { ProductService } from './product.service';
-import { ProductResponse } from './interfaces/product.interface';
+import { ProductService } from 'src/product/product.service';
+import { ProductResponse } from 'src/common/interfaces/product.interface';
+import { newProductDto, updateProductDto } from 'src/product/dtos/product.dto';
 
 @Controller('api/product')
 export class ProductController {
     constructor (private readonly productService: ProductService) {}
 
     @Get('get-all')
+    @HttpCode(HttpStatus.OK)
     async getAllUser(): Promise<ProductResponse> {
-        // return this.productService.getAllUser();
-        return;
+        try {
+            const data = await this.productService.getAllUser();
+            return {
+                status: 'OK',
+                message: 'Get all product is Successfully!!!',
+                data
+            };
+        } catch (error) {
+            throw new InternalServerErrorException(error);
+        }
     }
 
     @Get('get-detail/:id')
-    async getDetailProduct(@Param('id') id: number): Promise<ProductResponse> {
-        // return this.productService.getDetailProduct();
-        return;
+    @HttpCode(HttpStatus.OK)
+    async getDetailProduct(@Param('id') id: string): Promise<ProductResponse> {
+        try {
+            const data = await this.productService.getDetailProduct(id);
+            return {
+                status: 'OK',
+                message: 'Get detail product is Successfully!!!',
+                data
+            };
+        } catch (error) {
+            throw new InternalServerErrorException(error);
+        }
     }
 
     @Post('add-product')
-    async addProduct(): Promise<ProductResponse> {
-        // return this.productService.addProduct();
-        return;
+    @HttpCode(HttpStatus.CREATED)
+    async addProduct(@Body() body: newProductDto): Promise<ProductResponse> {
+        try {
+            const data = await this.productService.addProduct(body);
+            return {
+                status: 'OK',
+                message: 'Get detail product is Successfully!!!',
+                data
+            };
+        } catch (error) {
+            throw new InternalServerErrorException(error);
+        }
     }
 
     @Patch('update-product/:id')
-    async updateProduct(): Promise<ProductResponse> {
-        // return this.productService.updateProduct();
-        return;
+    @HttpCode(HttpStatus.OK)
+    async updateProduct(@Param('id') id: string, @Body() body: updateProductDto): Promise<ProductResponse> {
+        try {
+            const data = await this.productService.updateProduct(id, body);
+            return {
+                status: 'OK',
+                message: 'Get detail product is Successfully!!!',
+                data
+            };
+        } catch (error) {
+            throw new InternalServerErrorException(error);
+        }
     }
 
     @Delete('update-product/:id')
-    async deleteProduct(): Promise<ProductResponse> {
-        // return this.productService.deleteProduct();
-        return;
+    @HttpCode(HttpStatus.OK)
+    async deleteProduct(@Param('id') id: string): Promise<ProductResponse> {
+        try {
+            await this.productService.deleteProduct(id);
+            return {
+                status: 'OK',
+                message: 'Deleted product is Successfully!!!',
+            };
+        } catch (error) {
+            throw new InternalServerErrorException(error);
+        }        
     }
 }
