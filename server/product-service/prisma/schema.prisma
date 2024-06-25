@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum WarehouseStatus {
+  active
+  closed
+}
+
 model Images {
   id        String   @id @default(cuid())
   url       String
@@ -18,24 +23,80 @@ model Images {
   updatedAt DateTime @updatedAt
 }
 
+model Warehouse {
+  id            String          @id @default(cuid())
+  warehouseCode String          @unique
+  street        String
+  city          String
+  province      String
+  status        WarehouseStatus @default(active)
+  productStocks ProductStock[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
 model Product {
-  id             String    @id @default(cuid())
-  productCode    String    @unique
+  id             String          @id @default(cuid())
+  productCode    String          @unique
   name           String
   size           String?
-  price          Decimal
+  price          Decimal?
   promotionPrice Decimal?
   promotionStart DateTime?
   promotionEnd   DateTime?
   images         Images[]
   categoryId     String
-  category       Category  @relation(fields: [categoryId], references: [id])
-  desc           String    @db.LongText
-  quantity       Int
-  sold           Int       @default(0)
-  rate           Int       @default(5)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  category       Category        @relation(fields: [categoryId], references: [id])
+  brandId        String
+  brand          Brands          @relation(fields: [brandId], references: [id])
+  productOptions ProductOption[]
+  desc           String?         @db.LongText
+  sold           Int             @default(0)
+  rate           Int             @default(5)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model ProductOption {
+  id           String         @id @default(cuid())
+  name         String
+  value        OptionValue[]
+  productId    String
+  product      Product        @relation(fields: [productId], references: [id])
+  productStock ProductStock[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model ProductStock {
+  id          String        @id @default(cuid())
+  warehouseId String
+  warehouse   Warehouse     @relation(fields: [warehouseId], references: [id])
+  // productId    String
+  // product      Product       @relation(fields: [productId], references: [id])
+  optionId    String
+  option      ProductOption @relation(fields: [optionId], references: [id])
+  quantity    Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model OptionValue {
+  id              String        @id @default(cuid())
+  value           String
+  price           Decimal
+  productOptionId String
+  productOption   ProductOption @relation(fields: [productOptionId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Brands {
+  id        String    @id @default(cuid())
+  name      String
+  product   Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Category {

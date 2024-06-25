@@ -10,9 +10,9 @@ export class ProductController {
 
     @Get('get-all')
     @HttpCode(HttpStatus.OK)
-    async getAllUser(): Promise<ProductResponse> {
+    async getAllProduct(): Promise<ProductResponse> {
         try {
-            const data = await this.productService.getAllUser();
+            const data = await this.productService.getAllProduct();
             return {
                 status: 'OK',
                 message: 'Get all product is Successfully!!!',
@@ -68,7 +68,7 @@ export class ProductController {
         }
     }
 
-    @Delete('update-product/:id')
+    @Delete('delete-product/:id')
     @HttpCode(HttpStatus.OK)
     async deleteProduct(@Param('id') id: string): Promise<ProductResponse> {
         try {
