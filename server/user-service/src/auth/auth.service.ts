@@ -95,7 +95,8 @@ export class AuthService {
     async getDetailUser(id: string): Promise<User> {
         try {
             const data = await this.prismaService.user.findUnique({
-                where: { id }
+                where: { id },
+                include: { address: true }
             });
             if (!data) {
                 throw new HttpException('User not found', HttpStatus.NOT_FOUND);
